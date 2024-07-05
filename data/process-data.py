@@ -1,5 +1,4 @@
 import json
-import database
 from database import get_cursor, conn_commit
 from mysql.connector import Error
 

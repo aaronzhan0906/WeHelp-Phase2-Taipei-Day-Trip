@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Header, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 from datetime import date
 import jwt
@@ -19,12 +19,11 @@ class BookingInfo(BaseModel):
 # get #
 @router.get("/api/booking")
 async def get_order(authorization: str = Header(...), booking: BookingInfo = None):
-    # print(f"/api/booking GETGETGET {authorization}")
-    if authorization == "null": 
-        print("未登入")
-        raise HTTPException(status_code=403, detail={"error": True, "message": "Not logged in."})
-    
     try:
+        if authorization == "null": 
+            print("未登入")
+            return JSONResponse(status_code=403, content={"error": True, "message": "Not logged in."})
+        
         token = authorization.split()[1]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         booking = payload.get("booking")
@@ -33,12 +32,13 @@ async def get_order(authorization: str = Header(...), booking: BookingInfo = Non
             return JSONResponse(content={"data": None}, status_code=200)
 
         cursor, conn = get_cursor()
-        query = "SELECT id, name, address, images FROM attractions WHERE id = %s"
+        query = "SELECT attraction_id, name, address, images FROM attractions WHERE attraction_id = %s"
         try:
             cursor.execute(query, (booking["attractionId"],))
             attraction = cursor.fetchone()
             if not attraction:
                 return JSONResponse(content={"data": None}, status_code=200)
+            
         except Exception as exception:
             print(f"Error fetching attraction details: {exception}")
       
@@ -56,24 +56,26 @@ async def get_order(authorization: str = Header(...), booking: BookingInfo = Non
 
         print(f"要傳到前端的JSON${booking_detail}")
         conn_close(conn)
+
         return JSONResponse(content={"data": booking_detail}, status_code=200)
 
     except Exception as exception:
-        return JSONResponse(content={"error": True, "message": str(exception)}, status_code=500)
+        raise HTTPException(status_code=500, detail={"error": True, "message": str(exception)})
     
 
 
 # post #
 @router.post("/api/booking")
 async def post_order(authorization: str = Header(...), booking: BookingInfo = None):
-    if authorization == "null": 
-        print("未登入")
-        raise HTTPException(status_code=403, detail={"error": True, "message": "Not logged in."})
-
+    
     try:
+        if authorization == "null": 
+            print("未登入")
+            return JSONResponse(status_code=403, content={"error": True, "message": "Not logged in."})
+
         token = authorization.split()[1]
         if not booking:
-            return JSONResponse(content={"error": True, "message": "建立失敗，輸入不正確或其他原因"}, status_code=400)
+            return JSONResponse(status_code=400, content={"error": True, "message": "建立失敗，輸入不正確或其他原因"})
 
 
         new_booking = {
@@ -89,7 +91,7 @@ async def post_order(authorization: str = Header(...), booking: BookingInfo = No
         return JSONResponse(content={"ok": True}, headers={"Authorization": f"Bearer {new_token}"}, status_code=200)
 
     except Exception as exception:
-        return JSONResponse(content={"error": True, "message": str(exception)}, status_code=500)
+        raise HTTPException(status_code=500, detail={"error": True, "message": str(exception)})
 
 
 
@@ -106,4 +108,4 @@ async def delete_order(authorization: str = Header(...)):
         return JSONResponse(content={"ok": True, "message":"刪除API"}, headers={"Authorization": f"Bearer {no_booking_token}"}, status_code=200)
 
     except Exception as exception:
-        return JSONResponse(content={"error": True, "message": str(exception)}, status_code=500)
+        raise HTTPException(status_code=500, detail={"error": True, "message": str(exception)})

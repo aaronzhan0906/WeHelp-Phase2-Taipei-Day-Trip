@@ -22,9 +22,7 @@ window.addEventListener("DOMContentLoaded",() => {
     detectJwt(elements);
 
     // initial //
-   
     initial()
-
 });
 
 

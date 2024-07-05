@@ -32,7 +32,8 @@ export const userFormSignIn = async (elements) => {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            credentials: "include" 
         });
 
         const responseData = await response.json();
@@ -43,7 +44,6 @@ export const userFormSignIn = async (elements) => {
             detectJwt(elements);
             user.style.display = "none";
             overlay.style.display = "none";
-
         } else {
             console.log(responseData.message);
             const userBox = document.querySelector(".user__box");

@@ -5,7 +5,7 @@ router = APIRouter()
 sorted_mrts_names = []
 
 @router.get("/api/attractions")
-async def attractions(request: Request, page: int = Query(0, ge=0), keyword: str = Query(None)):
+async def attractions(page: int = Query(0, ge=0), keyword: str = Query(None)):
     try:
         cursor, conn = get_cursor()
         limit = 12
@@ -77,10 +77,10 @@ async def attractions(request: Request, page: int = Query(0, ge=0), keyword: str
 
 
 @router.get("/api/attraction/{attractionId}")
-async def attractions(request: Request, attractionId: int):
+async def attractions(attractionId: int):
     try:
         cursor, conn = get_cursor()
-        query = "SELECT * FROM attractions WHERE id = %s"
+        query = "SELECT * FROM attractions WHERE attraction_id = %s"
         cursor.execute(query, (attractionId,))
         attraction = cursor.fetchone()
 

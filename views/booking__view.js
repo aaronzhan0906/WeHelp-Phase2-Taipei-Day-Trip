@@ -1,3 +1,5 @@
+import { setupTapPay } from "../utils/tappay.js"
+
 export const bookingView = () => {
     renderBookingPage()
     deleteBooking()
@@ -32,8 +34,6 @@ export const renderBookingPage = async () => {
             });
 
             const journeyData = await response.json();
-            console.log(journeyData)
-            console.log(journeyData.data)
 
             if (journeyGreetUsername) {
                 journeyGreetUsername.textContent = signInName;
@@ -52,7 +52,9 @@ export const renderBookingPage = async () => {
                 journey.style.borderBottom = "none";
             } else {
                 const { attraction, date, time, price } = journeyData.data;
+                const tripDetail = journeyData.data
                 createBookingDOM(attraction, date, time, price);
+                setupTapPay(tripDetail);
             }
         } catch (error) {
             console.error(error);
@@ -121,7 +123,6 @@ export const deleteBooking = async () => {
             if (deleteRequest.ok) {
                 const noBookingToken = deleteRequest.headers.get("Authorization");
                 localStorage.setItem("jwt", noBookingToken)
-                console.log("購物車更新")
                 journeySection.style.display = "none";
                 contact.style.display = "none";
                 payment.style.display = "none";

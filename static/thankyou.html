@@ -3,9 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thank You</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/views/layouts/thankyou.css">
+  <link rel="stylesheet" href="/views/layouts/user.css">
+  <script type="module" src="/controllers/thankyou__controller.js"></script>
+  <title>Taipei Day Trip</title>
 </head>
 <body>
-  
+  <header>
+    <div class="navigation">
+      <div class="navigation__container">
+        <div class="navigation__left">
+          <h2 class="navigation__left-slogan">台北一日遊</h2>
+        </div>
+        <div class="navigation__right">
+          <div class="navigation__right-booking"></div>
+          <div class="navigation__right-signin"></div> 
+        </div>  
+      </div>
+    </div>
+</header>
+  <div class="main">
+    <div class="detail">
+      <div class="detail__header">行程預定成功</div>
+      <div class="detail__title">您的訂單編號如下</div>
+      <div class="detail__number">&nbsp;</div>
+      <div class="detail__footer">請記住此編號，或到會員中心查詢歷史訂單</div>
+    </div>
+  </div>
+</header>
+   <!-- user -->
+   <div class="overlay"></div>
+   <div class="user">
+     <div class="user__box">
+       <form class="user__form">
+         <div class="form__title">登入會員帳號</div>
+         <div>
+           <input type="text" class="form__name" name="name" placeholder="輸入姓名" required>
+         </div>
+         <div>
+           <input type="email" class="form__email" name="email" placeholder="輸入電子信箱" required>
+         </div>
+         <div>
+           <input type="password" class="form__password" name="password" placeholder="輸入密碼" required>
+         </div>
+         <span class="form__result"></span>
+         <button type="submit" class="form__submit">登入帳戶</button>
+         <div class="form__footer">
+           <span class="form__footer--question">還沒有帳戶？</span>
+           <span class="form__footer--register">點此註冊</span>
+         </div>
+       </form>
+     </div>
+   </div>
+ <footer>
+   <div class="footer">
+     <p class="footer__text">COPYRIGHT © 2021 台北一日遊</p>
+   </div>
+ </footer>
 </body>
 </html>

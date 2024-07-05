@@ -10,11 +10,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: inherit; 
 }
 
-.navigation {
-    border-bottom: 1px solid #E8E8E8; 
-}
-
-input {
+input, .tpfield {
     font-weight: 500;
     width: 190px;
     height: 38px;
@@ -24,7 +20,12 @@ input {
     border: 1px solid #E8E8E8
 }
 
+
 /* navigation */
+.navigation {
+    border-bottom: 1px solid #E8E8E8; 
+}
+
 .navigation__container {
     display: flex;
     align-items: center;
@@ -97,7 +98,6 @@ input {
     margin-bottom: 10px;
 }
 
-
 .section__image {
     width: 250px;
     height: 200px;
@@ -167,6 +167,15 @@ input {
     display: none;
 }
 
+.payment__items{
+    display: flex;
+}
+
+.payment__label{
+    margin-right: 5px;
+    padding-top: 21px;
+}
+
 .payment__container {
     margin:40px 0 40px 110px;
 }
@@ -210,6 +219,7 @@ input {
     color: #ffffff;
     border: 0px;
     letter-spacing: 1.0px;
+    cursor: pointer;
 }
 
 

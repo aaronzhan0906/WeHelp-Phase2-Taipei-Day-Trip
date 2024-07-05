@@ -9,6 +9,7 @@ import { initial } from "../utils/initial.js"
 
 
 window.addEventListener("DOMContentLoaded", () => {
+    // attractions //
     fetchAttractionsData();
     listBarApi();
     searchInputApi();

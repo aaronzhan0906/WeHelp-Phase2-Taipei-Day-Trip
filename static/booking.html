@@ -6,9 +6,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
-  <script type="module" src="/controllers/booking__controller.js"></script>
   <link rel="stylesheet" href="/views/layouts/user.css">
   <link rel="stylesheet" href="/views/layouts/booking.css">
+  <script src="https://js.tappaysdk.com/sdk/tpdirect/v5.14.0"></script>
+  <script> TPDirect.setupSDK(151768, 'app_bpgvxrsrLqJPEmRm62KQo07LxkPx3pQnADbRY54qEFQvc0kY0flPCYQLRK9a', 'sandbox') </script>
+  <script type="module" src="/controllers/booking__controller.js"></script>
   <title>Taipei Day Trip</title>
 </head>
 <body>
@@ -19,12 +21,12 @@
           <h2 class="navigation__left-slogan">台北一日遊</h2>
         </div>
         <div class="navigation__right">
-          <div class="navigation__right-booking">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</div>
-          <div class="navigation__right-signin">&emsp;&emsp;&emsp;&emsp;</div> 
-        </div>
+          <div class="navigation__right-booking"></div>
+          <div class="navigation__right-signin"></div> 
+        </div>  
       </div>
     </div>
-</header>
+  </header>
   <div class="main">
     <div class="journey">
       <div class="journey__greet">
@@ -67,15 +69,15 @@
         <form class="contact__form">
           <div>
             <label class="contact__item">聯絡姓名:</label>
-            <input type="text" class="contact__form--name" name="name">
+             <input type="text" class="contact__form--name" name="name" > <!-- value="測試用姓名" -->
           </div>
           <div>
             <label class="contact__item">聯絡信箱:</label>
-            <input type="email" class="contact__form--email" name="name">
+            <input type="email" class="contact__form--email" name="name" > <!-- value="test@gmail.com" -->
           </div>
           <div>
             <label class="contact__item">手機號碼:</label>
-            <input type="tel" class="contact__form--telephone" name="name">
+            <input type="tel" class="contact__form--telephone" name="name" > <!-- value="0989898989" -->
           </div>
         </form>
         <div class="contact__footer">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</div>
@@ -85,22 +87,21 @@
       <div class="payment__container">
         <div class="payment__title">信用卡付款資訊</div>
         <form class="payment__form">
-          <div>
-            <label class="payment__item">卡片號碼:</label>
-            <input type="text" class="payment__form--name" name="name" placeholder="**** **** **** ****">
+          <div class="payment__items">
+            <label class="payment__label">卡片號碼:</label>
+            <div class="tpfield contact__form--name" id="card-number"></div>
           </div>
-          <div>
-            <label class="payment__item">過期時間:</label>
-            <input type="email" class="payment__form--email" name="name" placeholder="MM / YY">
+          <div class="payment__items">
+            <label class="payment__label">過期時間:</label>
+            <div class="tpfield contact__form--email" id="card-expiration-date"></div>
           </div>
-          <div>
-            <label class="payment__item">驗證密碼:</label>
-            <input type="tel" class="payment__form--telephone" name="name" placeholder="CVV">
+          <div class="payment__items">
+            <label class="payment__label">驗證密碼:</label>
+            <div class="tpfield contact__form--telephone" id="card-ccv"></div>
           </div>
         </form>
       </div>
     </div>
-  
     <div class="confirm">
       <div class="confirm__cost">
         <span>總價：</span>
