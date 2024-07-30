@@ -123,7 +123,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .list-bar__arrow {
-    width: 32px;
+    width: 33px;
     height: 32px;
     background-color: #FFFFFF;
     background-position: center;
@@ -131,19 +131,24 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .list-bar__arrow--left {
-    background-image: url(/views/public/LeftArrow_Default.png);
+
+    background-repeat: no-repeat;
+    background-image: url(/views/public/LeftArrow_Default.svg);
 }
 
 .list-bar__arrow--right {
-    background-image: url(/views/public/RightArrow_Default.png);
+    background-repeat: no-repeat;
+    background-image: url(/views/public/RightArrow_Default.svg);
 }
 
 .list-bar__arrow--left:hover {
-    background-image: url(/views/public/LeftArrow_Hovered.png);
+    background-repeat: no-repeat;
+    background-image: url(/views/public/LeftArrow_Hovered.svg);
 }
 
 .list-bar__arrow--right:hover {
-    background-image: url(/views/public/RightArrow_Hovered.png);
+    background-repeat: no-repeat;
+    background-image: url(/views/public/RightArrow_Hovered.svg);
 }
 
 .list-bar__container {

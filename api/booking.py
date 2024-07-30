@@ -1,111 +1,149 @@
 from fastapi import APIRouter, Header, HTTPException
-from fastapi.responses import JSONResponse, Response
-from pydantic import BaseModel
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, ValidationError 
+from typing import List
 from datetime import date
+from api.userModel import UserModel
+from api.JWTHandler import JWTHandler
+from data.database import get_cursor, conn_close
 import jwt
-from api.user import get_user_info
-from api.jwt_utils import update_jwt_payload, SECRET_KEY, ALGORITHM
-from data.database import get_cursor, conn_commit, conn_close
-
-router = APIRouter()
-
-class BookingInfo(BaseModel):
-    attractionId: int
-    date: date
-    time: str
-    price: int
 
 
-# get #
-@router.get("/api/booking")
-async def get_order(authorization: str = Header(...), booking: BookingInfo = None):
-    try:
-        if authorization == "null": 
-            print("未登入")
-            return JSONResponse(status_code=403, content={"error": True, "message": "Not logged in."})
-        
-        token = authorization.split()[1]
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        booking = payload.get("booking")
-        if not booking:
-            print("No booking or empty booking")
-            return JSONResponse(content={"data": None}, status_code=200)
+# model
+class BookingModel:
+    @staticmethod
+    def get_booking_from_token(token):
+        payload = jwt.decode(token, JWTHandler.SECRET_KEY, algorithms=[JWTHandler.ALGORITHM])
+        return payload.get("booking")
 
+    @staticmethod
+    def get_attraction_details(attraction_id):
         cursor, conn = get_cursor()
-        query = "SELECT attraction_id, name, address, images FROM attractions WHERE attraction_id = %s"
         try:
-            cursor.execute(query, (booking["attractionId"],))
-            attraction = cursor.fetchone()
-            if not attraction:
-                return JSONResponse(content={"data": None}, status_code=200)
-            
-        except Exception as exception:
-            print(f"Error fetching attraction details: {exception}")
-      
-        booking_detail = {
+            query = "SELECT attraction_id, name, address, images FROM attractions WHERE attraction_id = %s"
+            cursor.execute(query, (attraction_id,))
+            return cursor.fetchone()
+        finally:
+            conn_close(conn)
+
+
+    
+    @staticmethod
+    def create_booking_detail(attraction, booking):
+        return {
             "attraction": {
                 "id": attraction[0],
                 "name": attraction[1],
                 "address": attraction[2],
-                "image":  'https://' + attraction[3].strip('"').split('https://')[1].split('\\n')[0]
+                "image": 'https://' + attraction[3].strip('"').split('https://')[1].split('\\n')[0]
             },
             "date": booking["date"],
             "time": booking["time"],
             "price": booking["price"]
         }
 
-        print(f"要傳到前端的JSON${booking_detail}")
-        conn_close(conn)
-
-        return JSONResponse(content={"data": booking_detail}, status_code=200)
-
-    except Exception as exception:
-        raise HTTPException(status_code=500, detail={"error": True, "message": str(exception)})
-    
-
-
-# post #
-@router.post("/api/booking")
-async def post_order(authorization: str = Header(...), booking: BookingInfo = None):
-    
-    try:
-        if authorization == "null": 
-            print("未登入")
-            return JSONResponse(status_code=403, content={"error": True, "message": "Not logged in."})
-
-        token = authorization.split()[1]
-        if not booking:
-            return JSONResponse(status_code=400, content={"error": True, "message": "建立失敗，輸入不正確或其他原因"})
-
-
-        new_booking = {
+    @staticmethod
+    def create_new_booking(booking):
+        return {
             "attractionId": booking.attractionId,
             "date": str(booking.date),
             "time": booking.time,
             "price": booking.price
         }
-        print(new_booking)
-        print(f"post  /api/booking   ${token}")
-        new_token = update_jwt_payload(token, {"booking": new_booking})
 
-        return JSONResponse(content={"ok": True}, headers={"Authorization": f"Bearer {new_token}"}, status_code=200)
+    @staticmethod
+    def update_booking_token(token, booking):
+        return JWTHandler.update_jwt_payload(token, {"booking": booking})
+
+
+class BookingView:
+    @staticmethod
+    def error_response(status_code, message):
+        return JSONResponse(status_code=status_code, content={"error": True, "message": message})
+    
+    @staticmethod
+    def ok_response(status_code, data=None, token=None, message=None):
+        content={"ok":True}
+        if data is not None:
+            content["data"] = data
+        if message is not None:
+            content["message"] = message
+        headers = {"Authorization": f"Bearer {token}"} if token else None
+        return JSONResponse(status_code=status_code, content=content, headers=headers)
+
+
+
+
+# controller
+
+router = APIRouter()
+class BookingInfo(BaseModel):
+    attractionId: int
+    date: date
+    time: str
+    price: int
+
+def validate_booking(booking: BookingInfo) -> List[str]:
+    time_slot_prices = {"morning": 2000, "afternoon": 2500}
+    errors = []
+    
+    if booking.time not in time_slot_prices:
+        errors.append("Invalid time slot")
+    elif booking.price != time_slot_prices[booking.time]:
+        errors.append(f"Incorrect price for {booking.time} slot")
+        
+    return errors
+
+
+@router.get("/api/booking")
+async def get_order(authorization: str = Header(...)):
+    if authorization == "null":
+        return BookingView.error_response(403, "Not logged in.")
+    
+    try:
+        token = authorization.split()[1]
+        booking = BookingModel.get_booking_from_token(token)
+        if not booking:
+            return BookingView.ok_response(200, data=None)
+
+        attraction = BookingModel.get_attraction_details(booking["attractionId"])
+        if not attraction:
+            return BookingView.ok_response(200, data=None)
+
+        booking_detail = BookingModel.create_booking_detail(attraction, booking)
+        return BookingView.ok_response(200, data=booking_detail)
 
     except Exception as exception:
-        raise HTTPException(status_code=500, detail={"error": True, "message": str(exception)})
+        return BookingView.error_response(500, str(exception))
 
+@router.post("/api/booking")
+async def post_order(authorization: str = Header(...), booking: BookingInfo = None):
+    if authorization == "null":
+        return BookingView.error_response(403, "Not logged in.")
+    
+    try:
+        token = authorization.split()[1]
+        new_booking = BookingModel.create_new_booking(booking)
+        new_token = BookingModel.update_booking_token(token, new_booking)
+        return BookingView.ok_response(200, token=new_token)
 
+    except ValidationError as ve:
+        error_messages = "; ".join(error["msg"] for error in ve.errors())
+        return BookingView.error_response(400, f"建立失敗，輸入不正確: {error_messages}")
 
-# delete #
+    except Exception as exception:
+        return BookingView.error_response(500, str(exception))
+
 @router.delete("/api/booking")
 async def delete_order(authorization: str = Header(...)):
-    user_info = await get_user_info(authorization)
+    user_info = await UserModel.get_user_info(authorization)
     if not user_info:
-        raise HTTPException(status_code=403, detail={"error": True, "message": "Not logged in."})
+        return BookingView.error_response(403, "Not logged in.")
+    
     try:
-        token = authorization.split()[1]  
-        no_booking_token = update_jwt_payload(token, {"booking": None})
-        print(f"DELETE {no_booking_token}")
-        return JSONResponse(content={"ok": True, "message":"刪除API"}, headers={"Authorization": f"Bearer {no_booking_token}"}, status_code=200)
+        token = authorization.split()[1]
+        no_booking_token = BookingModel.update_booking_token(token, None)
+        return BookingView.ok_response(200, message="刪除API", token=no_booking_token)
 
     except Exception as exception:
-        raise HTTPException(status_code=500, detail={"error": True, "message": str(exception)})
+        return BookingView.error_response(500, str(exception))

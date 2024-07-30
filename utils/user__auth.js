@@ -3,7 +3,6 @@ let isSignIn = true;
 
 export const userFormSignIn = async (elements) => {
     const { userForm, user ,overlay,formResult, userBox } = elements;
-    console.log("～～～ 嘗試登入 ～～～")
     const formData = new FormData(userForm);
     const data = {
         email: formData.get("email"),
@@ -126,27 +125,44 @@ export const detectJwt = async (elements) => {
 // userSignOut //
 export const userSignOut = async (elements) => {
     const { navigationRightSignIn, user, overlay } = elements;
-    localStorage.removeItem("jwt");
-    localStorage.removeItem("signInName");
-    navigationRightSignIn.textContent = "登入/註冊";
-    user.style.display = "none";
-    overlay.style.display = "none";
-    
-    overlay.addEventListener("click", () => {
-        initialSignUp(elements);
-    })
 
-    if (window.location.pathname === '/booking') {
-        window.location.reload();
-    } 
+    try {
+        const response = await fetch("/api/user/sign_out", {
+            method: "POST",
+            credentials: "include"  
+        });
 
+        if (!response.ok) {
+            throw new Error('登出失敗');
+        }
 
-    navigationRightSignIn.addEventListener("click", () => {
-        user.style.display = "block";
-        overlay.style.display = "block";
-    });
+        localStorage.removeItem("jwt");
+        localStorage.removeItem("signInName");
 
-    clearFormFields(elements);
+        // 更新 UI
+        navigationRightSignIn.textContent = "登入/註冊";
+        user.style.display = "none";
+        overlay.style.display = "none";
+
+        overlay.addEventListener("click", () => {
+            initialSignUp(elements);
+        });
+
+        if (window.location.pathname === '/booking') {
+            window.location.reload();
+        }
+
+        navigationRightSignIn.addEventListener("click", () => {
+            user.style.display = "block";
+            overlay.style.display = "block";
+        });
+
+        clearFormFields(elements);
+
+        console.log("登出成功");
+    } catch (error) {
+        console.error("登出時發生錯誤:", error);
+    }
 }
 
 

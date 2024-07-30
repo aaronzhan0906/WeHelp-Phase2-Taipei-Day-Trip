@@ -1,2 +1,5 @@
 .DS_Store
-cspell.json
+cspell.json__pycache__
+*.pyc
+*.pem
+local/
